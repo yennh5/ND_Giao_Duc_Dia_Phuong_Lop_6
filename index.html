@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khám Phá Địa Phương - Game Học Tập Lớp 6</title>
+    
+    <!-- Google Fonts: Baloo 2 cho phong cách đáng yêu, thân thiện -->
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome cho Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* ================= BIẾN CSS & CÀI ĐẶT CHUNG ================= */
+        :root {
+            --primary-bg: #E8F6EF; /* Xanh lá mạ nhạt */
+            --card-bg: #FFFFFF;
+            --text-main: #2C3E50;
+            --btn-blue: #AEE2FF;
+            --btn-blue-hover: #93D5F6;
+            --btn-yellow: #FEF5ED;
+            --btn-yellow-hover: #FCE9D9;
+            --correct-color: #A3E4D7;
+            --wrong-color: #F5B7B1;
+            --shadow: 0 8px 20px rgba(0,0,0,0.08);
+            --border-radius: 20px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Baloo 2', cursive, sans-serif;
+        }
+
+        body {
+            background-color: var(--primary-bg);
+            background-image: linear-gradient(135deg, #E8F6EF 0%, #D4E6F1 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-main);
+            padding: 20px;
+        }
+
+        /* ================= BỐ CỤC CHÍNH ================= */
+        #game-container {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 800px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 500px;
+        }
+
+        /* ================= THANH TIẾN TRÌNH ================= */
+        .header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            color: #34495E;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .progress-container {
+            width: 100%;
+            background-color: #EAECEE;
+            border-radius: 50px;
+            height: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #FAD7A1 0%, #F5B041 100%);
+            width: 0%;
+            transition: width 0.4s ease;
+            border-radius: 50px;
+        }
+
+        .progress-text {
+            margin-top: 8px;
+            font-weight: 600;
+            color: #7F8C8D;
+            font-size: 1.1rem;
+        }
+
+        /* ================= KHU VỰC CÂU HỎI ================= */
+        .question-area {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .question-text {
+            font-size: 1.4rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 25px;
+            line-height: 1.4;
+        }
+
+        /* Dạng Nút (Trắc nghiệm & Đúng/Sai) */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .options-grid {
+                grid-template-columns: 1fr; /* Mobile hiển thị 1 cột */
+            }
+        }
+
+        .option-btn {
+            background-color: var(--btn-blue);
+            border: none;
+            padding: 15px 20px;
+            border-radius: 15px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #2C3E50;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+        }
+
+        .option-btn:hover {
+            background-color: var(--btn-blue-hover);
+            transform: translateY(-2px);
+        }
+
+        .option-btn:active {
+            transform: translateY(1px);
+        }
+
+        .option-prefix {
+            background: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-weight: bold;
+            color: #2980B9;
+            flex-shrink: 0;
+        }
+
+        /* Dạng Điền từ */
+        .fill-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .fill-input {
+            width: 80%;
+            padding: 15px;
+            font-size: 1.3rem;
+            border: 2px solid #BDC3C7;
+            border-radius: 12px;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .fill-input:focus {
+            border-color: #3498DB;
+        }
+
+        .submit-btn {
+            background-color: #F5B041;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #D68910;
+            transition: all 0.2s;
+        }
+        .submit-btn:hover { background-color: #F39C12; }
+        .submit-btn:active { transform: translateY(4px); box-shadow: 0 0 0; }
+
+        /* Dạng Tự luận (Flashcard) */
+        .flashcard-container {
+            width: 100%;
+            perspective: 1000px;
+            margin-bottom: 20px;
+        }
+
+        .flashcard {
+            width: 100%;
+            min-height: 250px;
+            position: relative;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+
+        .flashcard.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .flashcard-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .flashcard-front {
+            background-color: #FCF3CF;
+            border: 3px dashed #F1C40F;
+        }
+
+        .flashcard-back {
+            background-color: #D5F5E3;
+            border: 3px dashed #2ECC71;
+            transform: rotateY(180deg);
+        }
+
+        .flashcard-text {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        
+        .flashcard-back .flashcard-text {
+            font-size: 1.1rem;
+            text-align: left;
+            width: 100%;
+        }
+        
+        .flashcard-hint {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #7F8C8D;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* ================= PHẢN HỒI (Đúng/Sai) & NÚT NEXT ================= */
+        .feedback-area {
+            text-align: center;
+            margin-top: 15px;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .feedback-msg {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 5px;
+            display: none;
+        }
+
+        .feedback-correct { color: #27AE60; }
+        .feedback-wrong { color: #E74C3C; }
+
+        .correct-answer-desc {
+            font-size: 1.1rem;
+            color: #34495E;
+            font-weight: 600;
+            display: none;
+            background: #F4F6F6;
+            padding: 8px 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .next-btn {
+            background-color: #5DADE2;
+            color: white;
+            border: none;
+            padding: 12px 35px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #2E86C1;
+            display: none;
+            transition: all 0.2s;
+            margin-top: 10px;
+        }
+        .next-btn:hover { background-color: #3498DB; }
+        .next-btn:active { transform: translateY(5px); box-shadow: 0 0 0; }
+
+        /* Các trạng thái khi chọn đáp án */
+        .option-btn.correct { background-color: var(--correct-color); border: 2px solid #27AE60; }
+        .option-btn.wrong { background-color: var(--wrong-color); border: 2px solid #C0392B; }
+        .option-btn.disabled { pointer-events: none; opacity: 0.6; }
+
+        /* ================= MÀN HÌNH KẾT THÚC ================= */
+        #end-screen {
+            display: none;
+            text-align: center;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            padding: 30px 0;
+        }
+
+        .trophy {
+            font-size: 6rem;
+            color: #F1C40F;
+            margin-bottom: 20px;
+            animation: bounceIn 1s ease;
+        }
+
+        .congrats-text {
+            font-size: 2.2rem;
+            color: #E67E22;
+            font-weight: 800;
+            margin-bottom: 15px;
+        }
+
+        .score-box {
+            background: #D4E6F1;
+            padding: 20px 40px;
+            border-radius: 20px;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #2980B9;
+            margin-bottom: 30px;
+        }
+
+        .restart-btn {
+            background-color: #48C9B0;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.4rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #1ABC9C;
+            transition: all 0.2s;
+        }
+        .restart-btn:hover { background-color: #16A085; }
+        .restart-btn:active { transform: translateY(5px); box-shadow: 0 0 0; }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); opacity: 1; }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <!-- Vùng hiển thị khi chơi -->
+        <div id="play-area">
+            <div class="header">
+                <h1><i class="fa-solid fa-map-location-dot"></i> Khám Phá Địa Phương</h1>
+                <div class="progress-container">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+                <div class="progress-text" id="progress-text">Câu 1 / 35</div>
+            </div>
+
+            <div class="question-area" id="question-area">
+                <!-- Nội dung câu hỏi sẽ được render bằng JS vào đây -->
+            </div>
+
+            <div class="feedback-area">
+                <div id="feedback-msg" class="feedback-msg"></div>
+                <div id="correct-answer-desc" class="correct-answer-desc"></div>
+                <button id="next-btn" class="next-btn">Câu tiếp theo <i class="fa-solid fa-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <!-- Màn hình kết thúc -->
+        <div id="end-screen">
+            <i class="fa-solid fa-trophy trophy"></i>
+            <div class="congrats-text">Chúc mừng con đã hoàn thành!</div>
+            <div class="score-box">
+                Điểm số: <span id="final-score">0</span> / <span id="total-scorable">0</span>
+            </div>
+            <button class="restart-btn" onclick="initGame()"><i class="fa-solid fa-rotate-right"></i> Chơi lại từ đầu</button>
+        </div>
+    </div>
+
+    <script>
+        // ================= DỮ LIỆU CÂU HỎI =================
+        // Chuyển đổi chính xác 100% dữ liệu từ yêu cầu
+        const quizData = [
+            // --- PHẦN 1: TRẮC NGHIỆM (20 CÂU) ---
+            {
+                type: 'mcq',
+                question: "1. Làng Vòng, thuộc phường Dịch Vọng Hậu, quận Cầu Giấy, Hà Nội nổi tiếng với món quà đặc sản nào thường được gói bằng lá sen?",
+                options: ["Chả cá", "Đậu phụ", "Cốm", "Bánh tôm"],
+                correctIndex: 2
+            },
+            {
+                type: 'mcq',
+                question: "2. Bánh cuốn Thanh Trì có điểm đặc biệt nào sau đây?",
+                options: ["Được gói trong lá dong", "Có nhân thịt băm và nấm mộc nhĩ", "Được nướng trên than hồng", "Ăn kèm với nước mắm pha tỏi ớt"],
+                correctIndex: 2
+            },
+            {
+                type: 'mcq',
+                question: "3. Phố Hàng Đường, Hà Nội nổi tiếng với sản phẩm đặc trưng nào?",
+                options: ["Bánh cốm", "Ô mai", "Nem chua", "Chè lam"],
+                correctIndex: 1
+            },
+            {
+                type: 'mcq',
+                question: "4. Địa danh nào sau đây nổi tiếng với nghề dệt lụa hơn 1000 năm tuổi?",
+                options: ["Làng Bát Tràng", "Làng Vạn Phúc", "Làng Phú Vinh", "Làng Thạch Xá"],
+                correctIndex: 1
+            },
+            {
+                type: 'mcq',
+                question: "5. Bát Tràng là làng nghề nổi tiếng với sản phẩm gì?",
+                options: ["Lụa", "Gốm sứ", "Mây tre đan", "Nón lá"],
+                correctIndex: 1
+            },
+            {
+                type: 'mcq',
+                question: "6. Làng Thạch Xá, huyện Thạch Thất được biết đến với sản phẩm nào?",
+                options: ["Đèn lồng", "Chuồn chuồn tre", "Gốm sứ", "Tranh dân gian"],
+                correctIndex: 1
+            },
+            {
+                type: 'mcq',
+                question: "7. Làng Tây Tựu, quận Bắc Từ Liêm nổi tiếng với sản phẩm nào?",
+                options: ["Hoa tươi", "Gốm sứ", "Vải lụa", "Bánh giầy"],
+                correctIndex: 0
+            },
+            {
+                type: 'mcq',
+                question: "8. Phong trào “Tết vì người nghèo và nạn nhân chất độc da cam\" được phát động bởi tổ chức nào?",
+                options: ["Hội Chữ thập đỏ Việt Nam", "Đoàn Thanh niên", "Hội Bảo trợ trẻ em mồ côi", "Thành đoàn Hà Nội"],
+                correctIndex: 0
+            },
+            {
+                type: 'mcq',
+                question: "9. Câu tục ngữ “Lá lành đùm lá rách\" thể hiện truyền thống gì của dân tộc Việt Nam?",
+                options: ["Tính tiết kiệm", "Tinh thần đoàn kết, tương thân tương ái", "Lối sống tiết kiệm", "Ý thức thiết chế"],
+                correctIndex: 1
+            },
+            {
+                type: 'mcq',
+                question: "10. Phong trào quyên góp sách vở cho học sinh vùng thiên tai giúp rèn luyện điều gì cho học sinh?",
+                options: ["Kỹ năng giao tiếp", "Tinh thần sẻ chia và ý thức cộng đồng", "Kỹ năng tự vệ", "Tư duy phản biện"],
+                correctIndex: 1
+            },
+            {
+                type: 'mcq',
+                question: "11. Phong trào “Vì đàn em thân yêu\" là hoạt động của tổ chức nào?",
+                options: ["Hội Chữ thập đỏ", "Hội đồng Đội thành phố Hà Nội", "Quỹ Vì người nghèo", "Hội Bảo trợ người khuyết tật"],
+                correctIndex: 1
+            },
+            {
+                type: 'mcq',
+                question: "12. “Ngôi nhà khăn quàng đỏ\" là chương trình dành cho đối tượng nào?",
+                options: ["Trẻ em có hoàn cảnh khó khăn", "Người già neo đơn", "Sinh viên xuất sắc", "Người lao động"],
+                correctIndex: 0
+            },
+            {
+                type: 'mcq',
+                question: "13. Hội Bảo trợ người khuyết tật và trẻ mồ côi thành phố Hà Nội tổ chức hoạt động nào?",
+                options: ["Tặng xe lăn", "Tặng tranh", "Tặng sữa", "Tặng sách"],
+                correctIndex: 0
+            },
+            {
+                type: 'mcq',
+                question: "14. Tác động tiêu cực của ô nhiễm tiếng ồn là gì?",
+                options: ["Gây bệnh hô hấp", "Gây mất thính giác, căng thẳng thần kinh", "Gây ung thư", "Gây tiêu chảy"],
+                correctIndex: 1
+            },
+            {
+                type: 'mcq',
+                question: "15. Khi nguồn nước bị ô nhiễm, người dân dễ mắc bệnh gì nhất?",
+                options: ["Bệnh tiêu hóa và da liễu", "Bệnh về mắt", "Bệnh tim mạch", "Bệnh về răng miệng"],
+                correctIndex: 0
+            },
+            {
+                type: 'mcq',
+                question: "16. Hoạt động nào góp phần bảo vệ môi trường không khí tốt nhất?",
+                options: ["Hạn chế sử dụng túi ni lông", "Giảm phương tiện cá nhân, trồng nhiều cây xanh", "Tăng tiếng loa truyền thanh", "Tổ chức nhiều lễ hội"],
+                correctIndex: 1
+            },
+            {
+                type: 'mcq',
+                question: "17. Nước thải chưa qua xử lý xả vào sông, hồ gây ảnh hưởng gì?",
+                options: ["Làm đẹp cảnh quan", "Ô nhiễm nước và hủy hoại hệ sinh thái", "Tăng trữ lượng cá", "Tạo nguồn nước sạch"],
+                correctIndex: 1
+            },
+            {
+                type: 'mcq',
+                question: "18. Nguyên nhân chính gây ô nhiễm không khí ở Hà Nội là?",
+                options: ["Rác thải hữu cơ", "Khí thải từ các phương tiện và các nhà máy", "Rác thải nhựa", "Đèn điện"],
+                correctIndex: 1
+            },
+            {
+                type: 'mcq',
+                question: "19. Bảo vệ môi trường đất bằng cách nào?",
+                options: ["Xây nhà cao tầng", "Xử lý rác thải đúng quy trình", "Dùng hóa chất", "Đào hố chôn rác"],
+                correctIndex: 1
+            },
+            {
+                type: 'mcq',
+                question: "20. Biện pháp giảm tiếng ồn hiệu quả là gì?",
+                options: ["Dùng tai nghe", "Giảm phương tiện giao thông", "Xây cao ốc", "Tăng cường máy móc"],
+                correctIndex: 1
+            },
+
+            // --- PHẦN 2: ĐÚNG / SAI (5 CÂU) ---
+            {
+                type: 'tf',
+                question: "21. Làng Vạn Phúc (Hà Đông, Hà Nội) là làng nghề truyền thống nổi tiếng của Hà Nội với sản phẩm gốm sứ.",
+                correctAnswer: false
+            },
+            {
+                type: 'tf',
+                question: "22. Phong trào “Tết vì người nghèo và nạn nhân chất độc da cam\" được tổ chức thường niên vào dịp Tết Nguyên Đán.",
+                correctAnswer: true
+            },
+            {
+                type: 'tf',
+                question: "23. Rác thải nhựa là nguyên nhân chính gây ô nhiễm không khí ở Hà Nội.",
+                correctAnswer: false
+            },
+            {
+                type: 'tf',
+                question: "24. Bánh tôm Hồ Tây được chế biến từ tôm và bột chiên giòn, ăn kèm nước mắm chua ngọt.",
+                correctAnswer: true
+            },
+            {
+                type: 'tf',
+                question: "25. Hoạt động trồng cây xanh giúp cải thiện môi trường không khí và giảm tiếng ồn.",
+                correctAnswer: true
+            },
+
+            // --- PHẦN 3: ĐIỀN TỪ (5 CÂU) ---
+            {
+                type: 'fill',
+                question: "26. Tên làng nghề chuyên làm nón lá truyền thống ở huyện Thanh Oai, Hà Nội là ______.",
+                correctText: "làng Chuông"
+            },
+            {
+                type: 'fill',
+                question: "27. Món bánh ______ được làm từ cốm non và đậu xanh, là đặc sản nổi tiếng Hà Nội.",
+                correctText: "bánh cốm"
+            },
+            {
+                type: 'fill',
+                question: "28. Phong trào thiện nguyện lớn dành cho thiếu nhi có hoàn cảnh khó khăn do Hội đồng Đội tổ chức mang tên “Ngôi nhà ______\".",
+                correctText: "khăn quàng đỏ"
+            },
+            {
+                type: 'fill',
+                question: "29. Nghề ______ là nghề truyền thống lâu đời của làng Quán gánh, Thường Tín, Hà Nội.",
+                correctText: "làm bánh giầy"
+            },
+            {
+                type: 'fill',
+                question: "30. Để bảo vệ môi trường đất, cần xử lý ______ đúng nơi quy định và phân loại rác tại nguồn.",
+                correctText: "rác thải"
+            },
+
+            // --- PHẦN 4: TỰ LUẬN DẠNG FLASHCARD (5 CÂU) ---
+            {
+                type: 'flashcard',
+                front: "31. Nêu một số hiểu biết của em về phong trào 'Tết vì người nghèo và nạn nhân chất độc da cam'.",
+                back: "- Là hoạt động thường niên dịp Tết Nguyên Đán giúp đỡ gia đình nghèo và nạn nhân chất độc da cam.<br>- Tổ chức quyên góp, trao quà Tết (thực phẩm, nhu yếu phẩm).<br>- Thể hiện tinh thần 'tương thân tương ái', sẻ chia để không ai cô đơn dịp Tết."
+            },
+            {
+                type: 'flashcard',
+                front: "32. Em hãy kể về một số hoạt động quyên góp sách vở, đồ dùng học tập cho các bạn nhỏ ở nơi bị thiên tai mà em biết.",
+                back: "- Thu gom sách vở cũ, đồ dùng học tập (bút, vở, cặp sách) và quần áo học sinh.<br>- Gửi đến các vùng bị thiên tai như miền Trung, khu vực bị lũ lụt."
+            },
+            {
+                type: 'flashcard',
+                front: "33. Theo em, nguyên nhân nào làm ô nhiễm đất? Ô nhiễm đất gây hại gì và chúng ta cần làm gì để bảo vệ đất?",
+                back: "- <b>Nguyên nhân:</b> rác thải sinh hoạt, công nghiệp, hóa chất nông nghiệp làm đất cằn cỗi.<br>- <b>Hậu quả:</b> gây bệnh cho người, động vật và hệ sinh thái.<br>- <b>Biện pháp:</b> hạn chế xả rác, tái chế, dùng phân bón hữu cơ, trồng cây xanh."
+            },
+            {
+                type: 'flashcard',
+                front: "34. Em hãy nêu nguyên nhân gây ô nhiễm nước, hậu quả và cách để bảo vệ nguồn nước sạch.",
+                back: "- <b>Nguyên nhân:</b> rác thải sinh hoạt, nước thải công nghiệp, hóa chất nông nghiệp.<br>- <b>Hậu quả:</b> gây bệnh tiêu hóa, da liễu, suy giảm nước ngọt.<br>- <b>Biện pháp:</b> xử lý nước thải, không xả rác ra sông hồ, tiết kiệm nước."
+            },
+            {
+                type: 'flashcard',
+                front: "35. Em đã làm những việc gì để giảm rác thải nhựa và túi ni lông trong cuộc sống hằng ngày?",
+                back: "- Mang túi vải đi mua sắm.<br>- Hạn chế dùng đồ nhựa 1 lần (ống hút, ly nhựa), thay bằng bình cá nhân.<br>- Phân loại rác để tái chế và nhắc nhở mọi người cùng làm."
+            }
+        ];
+
+        // ================= BIẾN TRẠNG THÁI GAME =================
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let answered = false;
+
+        // Tính tổng số câu được tính điểm (Trắc nghiệm, Đúng/Sai, Điền từ)
+        const totalScorableQuestions = quizData.filter(q => q.type !== 'flashcard').length;
+
+        // DOM Elements
+        const playArea = document.getElementById('play-area');
+        const endScreen = document.getElementById('end-screen');
+        const questionArea = document.getElementById('question-area');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        const feedbackMsg = document.getElementById('feedback-msg');
+        const correctAnswerDesc = document.getElementById('correct-answer-desc');
+        const nextBtn = document.getElementById('next-btn');
+        const finalScoreSpan = document.getElementById('final-score');
+        const totalScorableSpan = document.getElementById('total-scorable');
+
+        // Khởi tạo Game
+        function initGame() {
+            currentQuestionIndex = 0;
+            score = 0;
+            playArea.style.display = 'block';
+            endScreen.style.display = 'none';
+            totalScorableSpan.textContent = totalScorableQuestions;
+            loadQuestion();
+        }
+
+        // Tải câu hỏi ra màn hình
+        function loadQuestion() {
+            answered = false;
+            const currentQ = quizData[currentQuestionIndex];
+            
+            // Reset UI Phản hồi
+            feedbackMsg.style.display = 'none';
+            feedbackMsg.className = 'feedback-msg';
+            correctAnswerDesc.style.display = 'none';
+            correctAnswerDesc.innerHTML = '';
+            nextBtn.style.display = 'none';
+
+            // Cập nhật thanh tiến trình
+            const progressPercent = ((currentQuestionIndex) / quizData.length) * 100;
+            progressBar.style.width = `${progressPercent}%`;
+            progressText.textContent = `Câu ${currentQuestionIndex + 1} / ${quizData.length}`;
+
+            // Render Layout dựa trên loại câu hỏi
+            let htmlContent = '';
+
+            if (currentQ.type === 'mcq') {
+                const prefixes = ['A', 'B', 'C', 'D'];
+                let optionsHtml = '';
+                currentQ.options.forEach((opt, idx) => {
+                    optionsHtml += `<button class="option-btn" onclick="checkMCQ(${idx}, this)">
+                                        <span class="option-prefix">${prefixes[idx]}</span> ${opt}
+                                    </button>`;
+                });
+                htmlContent = `
+                    <div class="question-text">${currentQ.question}</div>
+                    <div class="options-grid">${optionsHtml}</div>
+                `;
+            } 
+            else if (currentQ.type === 'tf') {
+                htmlContent = `
+                    <div class="question-text">${currentQ.question}</div>
+                    <div class="options-grid">
+                        <button class="option-btn" style="justify-content:center; background-color:#D5F5E3" onclick="checkTF(true, this)"><i class="fa-solid fa-check" style="color:#27AE60; margin-right:10px"></i> Đúng</button>
+                        <button class="option-btn" style="justify-content:center; background-color:#FADBD8" onclick="checkTF(false, this)"><i class="fa-solid fa-xmark" style="color:#C0392B; margin-right:10px"></i> Sai</button>
+                    </div>
+                `;
+            }
+            else if (currentQ.type === 'fill') {
+                htmlContent = `
+                    <div class="question-text">${currentQ.question}</div>
+                    <div class="fill-container">
+                        <input type="text" id="fill-input" class="fill-input" placeholder="Nhập câu trả lời của con..." autocomplete="off">
+                        <button class="submit-btn" onclick="checkFill()">Gửi Đáp Án</button>
+                    </div>
+                `;
+            }
+            else if (currentQ.type === 'flashcard') {
+                htmlContent = `
+                    <div class="question-text" style="color:#E67E22"><i class="fa-solid fa-book-open"></i> Thẻ Học Tập Tự Luận</div>
+                    <div class="flashcard-container" onclick="flipCard()">
+                        <div class="flashcard" id="flashcard">
+                            <div class="flashcard-face flashcard-front">
+                                <div class="flashcard-text">${currentQ.front}</div>
+                                <div class="flashcard-hint"><i class="fa-solid fa-hand-pointer"></i> Chạm để lật xem đáp án chi tiết</div>
+                            </div>
+                            <div class="flashcard-face flashcard-back">
+                                <div class="flashcard-text">${currentQ.back}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                // Với Flashcard, hiển thị luôn nút Next (biến tấu text một chút)
+                nextBtn.innerHTML = `Đã hiểu! Câu tiếp theo <i class="fa-solid fa-arrow-right"></i>`;
+                nextBtn.style.display = 'block';
+                nextBtn.style.backgroundColor = '#27AE60';
+                nextBtn.style.boxShadow = '0 5px 0 #1E8449';
+            }
+
+            questionArea.innerHTML = htmlContent;
+
+            // Nút Next mặc định gắn sự kiện chuyển câu
+            nextBtn.onclick = handleNextBtn;
+        }
+
+        // ================= LOGIC CHẤM ĐIỂM =================
+
+        function checkMCQ(selectedIndex, btnElement) {
+            if (answered) return;
+            answered = true;
+            disableAllButtons();
+            
+            const currentQ = quizData[currentQuestionIndex];
+            const isCorrect = selectedIndex === currentQ.correctIndex;
+
+            if (isCorrect) {
+                btnElement.classList.add('correct');
+                showFeedback(true);
+                score++;
+            } else {
+                btnElement.classList.add('wrong');
+                // Highlight nút đúng
+                const allBtns = document.querySelectorAll('.option-btn');
+                allBtns[currentQ.correctIndex].classList.add('correct');
+                showFeedback(false, `Đáp án đúng là: <b>${currentQ.options[currentQ.correctIndex]}</b>`);
+            }
+        }
+
+        function checkTF(selectedBool, btnElement) {
+            if (answered) return;
+            answered = true;
+            disableAllButtons();
+
+            const currentQ = quizData[currentQuestionIndex];
+            const isCorrect = selectedBool === currentQ.correctAnswer;
+
+            if (isCorrect) {
+                btnElement.classList.add('correct');
+                showFeedback(true);
+                score++;
+            } else {
+                btnElement.classList.add('wrong');
+                // Highlight nút đúng
+                const allBtns = document.querySelectorAll('.option-btn');
+                allBtns.forEach(btn => {
+                    if (btn !== btnElement) btn.classList.add('correct');
+                });
+                const txtAnswer = currentQ.correctAnswer ? "Đúng" : "Sai";
+                showFeedback(false, `Câu này là: <b>${txtAnswer}</b>`);
+            }
+        }
+
+        function checkFill() {
+            if (answered) return;
+            const inputEl = document.getElementById('fill-input');
+            const userAns = inputEl.value.toLowerCase().trim();
+            
+            if (userAns === '') {
+                alert('Con hãy nhập câu trả lời nhé!');
+                return;
+            }
+
+            answered = true;
+            inputEl.disabled = true;
+            const submitBtn = document.querySelector('.submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.6';
+
+            const currentQ = quizData[currentQuestionIndex];
+            const correctAns = currentQ.correctText.toLowerCase().trim();
+
+            if (userAns === correctAns) {
+                inputEl.style.borderColor = '#27AE60';
+                inputEl.style.backgroundColor = '#EAFAF1';
+                showFeedback(true);
+                score++;
+            } else {
+                inputEl.style.borderColor = '#C0392B';
+                inputEl.style.backgroundColor = '#FDEDEC';
+                showFeedback(false, `Từ cần điền là: <b>${currentQ.correctText}</b>`);
+            }
+        }
+
+        // Logic Lật thẻ Flashcard
+        function flipCard() {
+            const card = document.getElementById('flashcard');
+            card.classList.toggle('flipped');
+        }
+
+        // ================= HÀM HỖ TRỢ =================
+
+        function disableAllButtons() {
+            const btns = document.querySelectorAll('.option-btn');
+            btns.forEach(btn => btn.classList.add('disabled'));
+        }
+
+        function showFeedback(isCorrect, rightAnswerText = '') {
+            feedbackMsg.style.display = 'block';
+            
+            if (isCorrect) {
+                feedbackMsg.innerHTML = `<i class="fa-regular fa-face-laugh-beam"></i> Tuyệt vời! Chính xác!`;
+                feedbackMsg.className = 'feedback-msg feedback-correct';
+            } else {
+                feedbackMsg.innerHTML = `<i class="fa-regular fa-face-sad-tear"></i> Rất tiếc, chưa đúng rồi!`;
+                feedbackMsg.className = 'feedback-msg feedback-wrong';
+                
+                // Hiện đáp án đúng
+                if (rightAnswerText) {
+                    correctAnswerDesc.innerHTML = rightAnswerText;
+                    correctAnswerDesc.style.display = 'inline-block';
+                }
+            }
+
+            // Hiện nút Next
+            nextBtn.innerHTML = `Câu tiếp theo <i class="fa-solid fa-arrow-right"></i>`;
+            nextBtn.style.backgroundColor = '#5DADE2';
+            nextBtn.style.boxShadow = '0 5px 0 #2E86C1';
+            nextBtn.style.display = 'block';
+        }
+
+        function handleNextBtn() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < quizData.length) {
+                loadQuestion();
+            } else {
+                showEndScreen();
+            }
+        }
+
+        function showEndScreen() {
+            playArea.style.display = 'none';
+            endScreen.style.display = 'flex';
+            finalScoreSpan.textContent = score;
+        }
+
+        // Chạy game khi tải trang
+        window.onload = initGame;
+
+    </script>
+</body>
+</html>
